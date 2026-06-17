@@ -6,6 +6,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.templates import render
 from app.routes import predict, crawl, feedback
+from app.database import init_db
+from app.crawler.scheduler import start_scheduler
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +29,10 @@ async def index(request: Request):
 
 @app.on_event("startup")
 async def startup():
-    """确保 data 目录和关键 JSON 文件存在"""
+    """初始化数据库 + 启动调度器 + 确保 data 目录存在"""
+    init_db()
+    start_scheduler()
+
     data_dir = BASE_DIR / "data"
     for sub in ["predictions", "matches"]:
         (data_dir / sub).mkdir(parents=True, exist_ok=True)
