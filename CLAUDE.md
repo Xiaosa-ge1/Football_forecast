@@ -43,6 +43,7 @@ E:\worldcup2026-prediction-skill\
 │   └── update_daily.py           # 每日情报更新脚本（python scripts/update_daily.py）
 ├── skill.md                      # 核心 system prompt（48 队资料库/方法论/红线）
 ├── docs/TUTORIAL.md              # 零基础部署教程（面向国内用户）
+├── .gitignore                     # 忽略 __pycache__ / .claude / data 生成文件
 ├── CLAUDE.md                     # 本文件
 ├── requirements.txt
 └── README.md
@@ -82,4 +83,4 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ## 关键链接
 
 - Live Demo: http://worldcup.youliaoyun.com
-- GitHub: https://github.com/TradingAi666/worldcup2026-prediction-skill
+- GitHub: https://github.com/Xiaosa-ge1/Football_forecast
