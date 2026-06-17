@@ -13,43 +13,77 @@
   </div>
 </div>
 
+{% set groups = get_groups() %}
+
 <div class="card">
   <h2>赛事概览</h2>
-  <p style="color:var(--gray-600); margin-bottom:12px;">
-    2026 FIFA 世界杯 · 美国/加拿大/墨西哥三国联办<br>
-    48 队 · 12 小组 · 64 场比赛
+  <p style="color:var(--gray-600); margin-bottom:8px;">
+    2026 FIFA 世界杯 · 美国 / 加拿大 / 墨西哥三国联办<br>
+    48 队 · 12 小组 · 64 场比赛 · 6/11 揭幕 &mdash; 7/19 决赛
   </p>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>组别</th>
-          <th>球队</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% set groups = {
-          "A": ["墨西哥", "南非", "韩国", "捷克"],
-          "B": ["加拿大", "波黑", "卡塔尔", "瑞士"],
-          "C": ["巴西", "摩洛哥", "海地", "苏格兰"],
-          "D": ["美国", "巴拉圭", "澳大利亚", "土耳其"],
-          "E": ["德国", "库拉索", "科特迪瓦", "厄瓜多尔"],
-          "F": ["荷兰", "日本", "瑞典", "突尼斯"],
-          "G": ["比利时", "埃及", "伊朗", "新西兰"],
-          "H": ["西班牙", "佛得角", "沙特", "乌拉圭"],
-          "I": ["法国", "塞内加尔", "伊拉克", "挪威"],
-          "J": ["阿根廷", "阿尔及利亚", "奥地利", "约旦"],
-          "K": ["葡萄牙", "刚果金", "乌兹别克斯坦", "哥伦比亚"],
-          "L": ["英格兰", "克罗地亚", "加纳", "巴拿马"]
-        } %}
-        {% for letter, teams in groups.items() %}
-        <tr>
-          <td><strong>{{ letter }}</strong></td>
-          <td>{{ teams | join(" · ") }}</td>
-        </tr>
+</div>
+
+<!-- 淘汰赛晋级图 -->
+<div class="tournament-bracket">
+
+  <!-- 左侧：小组赛 -->
+  <div class="bracket-groups">
+    {% for letter in 'ABCDEFGHIJKL' %}
+    <div class="group-card">
+      <div class="group-card__header">
+        <span class="group-card__label">{{ letter }} 组</span>
+      </div>
+      <ul class="group-card__teams">
+        {% for t in groups[letter] %}
+        <li>
+          <span class="flag-emoji">{{ flag_emoji(t.country_code) }}</span>
+          {{ t.name }}
+        </li>
         {% endfor %}
-      </tbody>
-    </table>
+      </ul>
+    </div>
+    {% endfor %}
   </div>
+
+  <!-- 中间：晋级标识 -->
+  <div class="bracket-connector" aria-hidden="true">
+    <div class="bracket-connector__arrow">▶</div>
+    <div class="bracket-connector__label">小组前2名<br>+ 8个最佳第3名<br>→ 32强淘汰赛</div>
+  </div>
+
+  <!-- 右侧：淘汰赛 -->
+  <div class="bracket-knockout">
+    <div class="bracket-round bracket-round--r32">
+      <h3>32 强</h3>
+      {% for i in range(16) %}
+      <div class="bracket-slot"><span class="bracket-slot__seed">{{ i + 1 }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="bracket-round bracket-round--r16">
+      <h3>16 强</h3>
+      {% for i in range(8) %}
+      <div class="bracket-slot"><span class="bracket-slot__seed">{{ i + 1 }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="bracket-round bracket-round--qf">
+      <h3>1/4 决赛</h3>
+      {% for i in range(4) %}
+      <div class="bracket-slot"><span class="bracket-slot__seed">{{ i + 1 }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="bracket-round bracket-round--sf">
+      <h3>半决赛</h3>
+      {% for i in range(2) %}
+      <div class="bracket-slot"><span class="bracket-slot__seed">{{ i + 1 }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="bracket-round bracket-round--final">
+      <h3>决赛</h3>
+      <div class="bracket-slot bracket-slot--champion">
+        <span class="bracket-slot__seed">🏆 冠军</span>
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

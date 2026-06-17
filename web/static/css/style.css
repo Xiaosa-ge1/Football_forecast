@@ -27,6 +27,7 @@ body {
   color: var(--gray-800);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ===== 导航 ===== */
@@ -77,7 +78,7 @@ body {
 
 /* ===== 主容器 ===== */
 .container {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 32px 20px;
 }
@@ -87,7 +88,7 @@ body {
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 24px;
+  padding: 28px;
   margin-bottom: 20px;
   border: 1px solid var(--gray-200);
 }
@@ -96,6 +97,35 @@ body {
   font-size: 18px;
   margin-bottom: 16px;
   color: var(--green-900);
+}
+
+/* ===== 国旗图片 ===== */
+.flag-img {
+  vertical-align: middle;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.flag-emoji {
+  font-size: 16px;
+  line-height: 1;
+  vertical-align: middle;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.result-team__flag {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.player-item__flag {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* ===== 表单 ===== */
@@ -180,6 +210,11 @@ select:focus, input:focus {
   background: var(--green-100);
 }
 
+.btn-lg {
+  padding: 14px 36px;
+  font-size: 17px;
+}
+
 /* ===== 胜平负概率条 ===== */
 .prob-bar {
   display: flex;
@@ -189,6 +224,13 @@ select:focus, input:focus {
   margin: 16px 0;
   font-size: 13px;
   font-weight: 600;
+}
+
+.prob-bar--lg {
+  height: 48px;
+  font-size: 15px;
+  border-radius: 12px;
+  margin: 20px 0 8px;
 }
 
 .prob-bar .seg {
@@ -204,29 +246,88 @@ select:focus, input:focus {
 .prob-bar .seg-draw { background: var(--gray-400); }
 .prob-bar .seg-b { background: var(--blue); }
 
+.prob-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
 /* ===== 预测结果卡片 ===== */
 .result-card {
   border-left: 4px solid var(--green-700);
 }
 
-.result-card .score-big {
-  font-size: 36px;
+.result-card--large {
+  padding: 36px;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.result-team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.result-team:last-child {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.result-team__name {
   font-weight: 700;
-  text-align: center;
-  margin: 16px 0;
+  font-size: 22px;
   color: var(--gray-900);
 }
 
-.result-card .team-name {
-  font-weight: 600;
-  font-size: 16px;
+.result-vs {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.result-score {
+  font-size: 56px;
+  font-weight: 800;
+  text-align: center;
+  margin: 12px 0;
+  color: var(--gray-900);
+  letter-spacing: 4px;
+}
+
+.result-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.result-players {
+  margin-top: 16px;
+}
+
+.result-players h3 {
+  font-size: 14px;
+  color: var(--gray-400);
+  font-weight: 500;
+  margin-bottom: 10px;
 }
 
 .confidence-badge {
   display: inline-block;
-  padding: 2px 12px;
+  padding: 4px 14px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -244,9 +345,10 @@ select:focus, input:focus {
 .key-factors .tag {
   background: var(--green-100);
   color: var(--green-900);
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 16px;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .analysis-text {
@@ -254,9 +356,45 @@ select:focus, input:focus {
   color: var(--gray-600);
   line-height: 1.7;
   margin: 12px 0;
-  padding: 12px;
+  padding: 14px;
   background: var(--gray-100);
   border-radius: 8px;
+}
+
+/* 关键球员网格 */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.player-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--green-50);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.player-item strong {
+  display: block;
+  color: var(--green-900);
+  font-size: 14px;
+}
+
+.player-item__team {
+  display: inline-block;
+  color: var(--gray-400);
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.player-item__reason {
+  display: block;
+  color: var(--gray-600);
+  margin-top: 2px;
 }
 
 .player-watch {
@@ -411,7 +549,480 @@ tr:hover td {
   flex-wrap: wrap;
 }
 
+/* ===== 预测页面表单 ===== */
+.predict-form-card {
+  padding: 36px;
+}
+
+.predict-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.predict-form__teams {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.predict-form__team {
+  flex: 1;
+}
+
+.predict-form__team label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 10px;
+}
+
+.predict-form__team select.team-select {
+  font-size: 16px;
+  padding: 14px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.predict-form__vs {
+  flex-shrink: 0;
+  padding-top: 30px;
+}
+
+.vs-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--green-100);
+  color: var(--green-700);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.predict-form__actions {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.date-input {
+  max-width: 200px;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 10px;
+}
+
+/* ===== 锦标赛晋级图 ===== */
+.tournament-bracket {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  overflow-x: auto;
+  padding: 20px 0 12px;
+  min-height: 680px;
+}
+
+/* 小组卡片区域 */
+.bracket-groups {
+  display: grid;
+  grid-template-columns: repeat(2, 170px);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+
+.group-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.group-card:hover {
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.group-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--green-100);
+}
+
+.group-card__label {
+  font-weight: 700;
+  color: var(--green-900);
+  font-size: 14px;
+}
+
+.group-card__teams {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.group-card__teams li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--gray-800);
+  white-space: nowrap;
+}
+
+/* 晋级连接器 */
+.bracket-connector {
+  flex-shrink: 0;
+  width: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  position: relative;
+  background: linear-gradient(to right, transparent 0%, var(--green-50) 30%, var(--green-50) 70%, transparent 100%);
+}
+
+.bracket-connector::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  bottom: 8%;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--green-700) 0px,
+    var(--green-700) 4px,
+    transparent 4px,
+    transparent 10px
+  );
+  opacity: 0.3;
+}
+
+.bracket-connector__arrow {
+  font-size: 40px;
+  color: var(--green-700);
+  margin-bottom: 16px;
+}
+
+.bracket-connector__label {
+  font-size: 13px;
+  color: var(--gray-600);
+  text-align: center;
+  line-height: 1.8;
+  font-weight: 600;
+}
+
+/* 淘汰赛轮次 */
+.bracket-knockout {
+  display: flex;
+  gap: 0;
+  flex-grow: 1;
+  overflow-x: auto;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  min-width: 110px;
+  padding: 0 6px;
+}
+
+.bracket-round h3 {
+  text-align: center;
+  font-size: 12px;
+  color: var(--green-900);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.bracket-slot {
+  background: var(--white);
+  border: 1px dashed var(--gray-200);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--gray-400);
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin: 1px 0;
+}
+
+.bracket-slot:hover {
+  border-color: var(--green-500);
+  color: var(--green-900);
+  background: var(--green-50);
+}
+
+.bracket-slot--champion {
+  border: 2px solid var(--amber);
+  border-style: solid;
+  min-height: 52px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.bracket-slot__seed {
+  font-weight: 500;
+}
+
+/* 各轮次高度分布 */
+.bracket-round--r32 .bracket-slot { min-height: 34px; font-size: 11px; }
+.bracket-round--r16 .bracket-slot { min-height: 40px; font-size: 12px; }
+.bracket-round--qf .bracket-slot { min-height: 48px; font-size: 12px; }
+.bracket-round--sf .bracket-slot { min-height: 56px; font-size: 13px; }
+.bracket-round--final .bracket-slot { min-height: 72px; font-size: 14px; }
+.bracket-round--final { min-width: 100px; }
+
+/* ===== 像素风装饰 ===== */
+.pixel-art {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 足球 16×16 像素 */
+.pixel-art--soccer {
+  bottom: 80px;
+  right: 40px;
+}
+
+.pixel-art--soccer::after {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 2px;
+  box-shadow:
+    6px  2px  0 0 rgba(26, 26, 26, 0.18),
+    8px  2px  0 0 rgba(26, 26, 26, 0.18),
+    10px 2px  0 0 rgba(26, 26, 26, 0.18),
+    12px 2px  0 0 rgba(26, 26, 26, 0.18),
+    4px  4px  0 0 rgba(26, 26, 26, 0.18),
+    14px 4px  0 0 rgba(26, 26, 26, 0.18),
+    2px  6px  0 0 rgba(26, 26, 26, 0.18),
+    16px 6px  0 0 rgba(26, 26, 26, 0.18),
+    2px  8px  0 0 rgba(26, 26, 26, 0.18),
+    10px 8px  0 0 rgba(240, 240, 240, 0.25),
+    16px 8px  0 0 rgba(26, 26, 26, 0.18),
+    2px  10px 0 0 rgba(26, 26, 26, 0.18),
+    10px 10px 0 0 rgba(240, 240, 240, 0.25),
+    16px 10px 0 0 rgba(26, 26, 26, 0.18),
+    2px  12px 0 0 rgba(26, 26, 26, 0.18),
+    16px 12px 0 0 rgba(26, 26, 26, 0.18),
+    4px  14px 0 0 rgba(26, 26, 26, 0.18),
+    14px 14px 0 0 rgba(26, 26, 26, 0.18),
+    6px  16px 0 0 rgba(26, 26, 26, 0.18),
+    8px  16px 0 0 rgba(26, 26, 26, 0.18),
+    10px 16px 0 0 rgba(26, 26, 26, 0.18),
+    12px 16px 0 0 rgba(26, 26, 26, 0.18),
+    6px  18px 0 0 rgba(26, 26, 26, 0.18),
+    10px 18px 0 0 rgba(26, 26, 26, 0.18),
+    12px 18px 0 0 rgba(26, 26, 26, 0.18),
+    8px  20px 0 0 rgba(26, 26, 26, 0.18),
+    10px 20px 0 0 rgba(26, 26, 26, 0.18);
+}
+
+/* 奖杯 12×16 像素 */
+.pixel-art--trophy {
+  top: 110px;
+  left: 36px;
+}
+
+.pixel-art--trophy::after {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 2px;
+  box-shadow:
+    8px  0px  0 0 rgba(200, 155, 40, 0.22),
+    10px 0px  0 0 rgba(200, 155, 40, 0.22),
+    6px  2px  0 0 rgba(200, 155, 40, 0.22),
+    8px  2px  0 0 rgba(200, 155, 40, 0.22),
+    10px 2px  0 0 rgba(200, 155, 40, 0.22),
+    12px 2px  0 0 rgba(200, 155, 40, 0.22),
+    6px  4px  0 0 rgba(200, 155, 40, 0.22),
+    8px  4px  0 0 rgba(200, 155, 40, 0.22),
+    10px 4px  0 0 rgba(200, 155, 40, 0.22),
+    12px 4px  0 0 rgba(200, 155, 40, 0.22),
+    4px  6px  0 0 rgba(200, 155, 40, 0.22),
+    6px  6px  0 0 rgba(200, 155, 40, 0.22),
+    12px 6px  0 0 rgba(200, 155, 40, 0.22),
+    14px 6px  0 0 rgba(200, 155, 40, 0.22),
+    4px  8px  0 0 rgba(200, 155, 40, 0.22),
+    6px  8px  0 0 rgba(200, 155, 40, 0.22),
+    12px 8px  0 0 rgba(200, 155, 40, 0.22),
+    14px 8px  0 0 rgba(200, 155, 40, 0.22),
+    4px  10px 0 0 rgba(200, 155, 40, 0.22),
+    6px  10px 0 0 rgba(200, 155, 40, 0.22),
+    12px 10px 0 0 rgba(200, 155, 40, 0.22),
+    14px 10px 0 0 rgba(200, 155, 40, 0.22),
+    4px  12px 0 0 rgba(200, 155, 40, 0.22),
+    14px 12px 0 0 rgba(200, 155, 40, 0.22),
+    4px  14px 0 0 rgba(200, 155, 40, 0.22),
+    14px 14px 0 0 rgba(200, 155, 40, 0.22),
+    6px  16px 0 0 rgba(200, 155, 40, 0.22),
+    12px 16px 0 0 rgba(200, 155, 40, 0.22),
+    8px  18px 0 0 rgba(200, 155, 40, 0.22),
+    10px 18px 0 0 rgba(200, 155, 40, 0.22),
+    8px  20px 0 0 rgba(200, 155, 40, 0.22),
+    10px 20px 0 0 rgba(200, 155, 40, 0.22),
+    8px  22px 0 0 rgba(200, 155, 40, 0.22),
+    10px 22px 0 0 rgba(200, 155, 40, 0.22);
+}
+
+/* 枫叶（加拿大）10×12 像素 */
+.pixel-art--maple {
+  top: 50%;
+  left: 28px;
+}
+
+.pixel-art--maple::after {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 2px;
+  box-shadow:
+    8px  0px  0 0 rgba(200, 50, 50, 0.18),
+    6px  2px  0 0 rgba(200, 50, 50, 0.18),
+    8px  2px  0 0 rgba(200, 50, 50, 0.18),
+    10px 2px  0 0 rgba(200, 50, 50, 0.18),
+    4px  4px  0 0 rgba(200, 50, 50, 0.18),
+    6px  4px  0 0 rgba(200, 50, 50, 0.18),
+    8px  4px  0 0 rgba(200, 50, 50, 0.18),
+    10px 4px  0 0 rgba(200, 50, 50, 0.18),
+    12px 4px  0 0 rgba(200, 50, 50, 0.18),
+    2px  6px  0 0 rgba(200, 50, 50, 0.18),
+    4px  6px  0 0 rgba(200, 50, 50, 0.18),
+    6px  6px  0 0 rgba(200, 50, 50, 0.18),
+    10px 6px  0 0 rgba(200, 50, 50, 0.18),
+    12px 6px  0 0 rgba(200, 50, 50, 0.18),
+    14px 6px  0 0 rgba(200, 50, 50, 0.18),
+    0px  8px  0 0 rgba(200, 50, 50, 0.18),
+    2px  8px  0 0 rgba(200, 50, 50, 0.18),
+    6px  8px  0 0 rgba(200, 50, 50, 0.18),
+    10px 8px  0 0 rgba(200, 50, 50, 0.18),
+    14px 8px  0 0 rgba(200, 50, 50, 0.18),
+    16px 8px  0 0 rgba(200, 50, 50, 0.18),
+    2px  10px 0 0 rgba(200, 50, 50, 0.18),
+    4px  10px 0 0 rgba(200, 50, 50, 0.18),
+    6px  10px 0 0 rgba(200, 50, 50, 0.18),
+    10px 10px 0 0 rgba(200, 50, 50, 0.18),
+    12px 10px 0 0 rgba(200, 50, 50, 0.18),
+    14px 10px 0 0 rgba(200, 50, 50, 0.18),
+    4px  12px 0 0 rgba(200, 50, 50, 0.18),
+    6px  12px 0 0 rgba(200, 50, 50, 0.18),
+    10px 12px 0 0 rgba(200, 50, 50, 0.18),
+    12px 12px 0 0 rgba(200, 50, 50, 0.18),
+    6px  14px 0 0 rgba(200, 50, 50, 0.18),
+    8px  14px 0 0 rgba(200, 50, 50, 0.18),
+    10px 14px 0 0 rgba(200, 50, 50, 0.18),
+    8px  16px 0 0 rgba(200, 50, 50, 0.18),
+    10px 16px 0 0 rgba(200, 50, 50, 0.18);
+}
+
 /* ===== 响应式 ===== */
+@media (max-width: 900px) {
+  .tournament-bracket {
+    flex-direction: column;
+    overflow-x: visible;
+    min-height: auto;
+  }
+
+  .bracket-groups {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 6px;
+  }
+
+  .bracket-connector {
+    width: 100%;
+    height: 60px;
+    flex-direction: row;
+    padding: 8px 20px;
+  }
+
+  .bracket-connector::before {
+    left: 8%;
+    right: 8%;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--green-300, #4a9e6e) 0px,
+      var(--green-300, #4a9e6e) 4px,
+      transparent 4px,
+      transparent 10px
+    );
+  }
+
+  .bracket-connector__arrow {
+    transform: rotate(90deg);
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+
+  .bracket-connector__label {
+    white-space: nowrap;
+    font-size: 10px;
+  }
+
+  .bracket-knockout {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .bracket-round {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: auto;
+    padding: 4px 0;
+  }
+
+  .bracket-round h3 {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .bracket-slot {
+    flex: 1;
+    min-width: 50px;
+    min-height: 30px !important;
+    font-size: 11px !important;
+  }
+
+  .bracket-slot--champion {
+    min-height: 40px !important;
+  }
+}
+
 @media (max-width: 768px) {
   .nav { padding: 0 16px; gap: 16px; }
   .nav-logo { font-size: 16px; }
@@ -420,4 +1031,48 @@ tr:hover td {
   .hero h1 { font-size: 26px; }
   .result-card .score-big { font-size: 28px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .result-card--large { padding: 24px; }
+  .result-score { font-size: 40px; }
+  .result-header { flex-wrap: wrap; gap: 10px; }
+  .result-team__name { font-size: 18px; }
+  .result-vs { font-size: 14px; }
+
+  .predict-form__teams {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .predict-form__vs {
+    padding-top: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .vs-text {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+  }
+
+  .player-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bracket-groups {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pixel-art {
+    display: none;
+  }
+
+  .predict-form__actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .date-input {
+    max-width: 100%;
+  }
 }

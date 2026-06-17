@@ -6,24 +6,12 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from app.templates import render
+from app.templates import render, load_teams
 from app.engine.predictor import predict
 from app.models.schemas import PredictRequest
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 router = APIRouter()
-
-
-def _load_teams() -> list[dict]:
-    """从 data/teams.json 加载球队列表。"""
-    path = BASE_DIR / "data" / "teams.json"
-    if not path.exists():
-        return []
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return data.get("teams", [])
-    except (json.JSONDecodeError, KeyError):
-        return []
 
 
 def _save_prediction(record: dict):
@@ -37,7 +25,7 @@ def _save_prediction(record: dict):
 
 @router.get("/predict", response_class=HTMLResponse)
 async def predict_page(request: Request):
-    teams = _load_teams()
+    teams = load_teams()
     return render("predict.html", request, teams=teams)
 
 
@@ -76,4 +64,4 @@ async def predict_history():
 @router.get("/api/teams")
 async def list_teams():
     """返回球队列表。"""
-    return JSONResponse(content=_load_teams())
+    return JSONResponse(content=load_teams())
