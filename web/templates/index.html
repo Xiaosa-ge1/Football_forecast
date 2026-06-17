@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}绿茵神算 · 2026 世界杯预测系统{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <h1>⚽ 绿茵神算</h1>
+  <p>基于 AI 的 2026 世界杯比赛预测引擎<br>输入球队，即刻获取专业赛果分析</p>
+  <div class="quick-nav">
+    <a href="/predict" class="btn btn-primary">开始预测</a>
+    <a href="/matches" class="btn btn-outline">查看赛况</a>
+    <a href="/feedback" class="btn btn-outline">反馈校准</a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>赛事概览</h2>
+  <p style="color:var(--gray-600); margin-bottom:12px;">
+    2026 FIFA 世界杯 · 美国/加拿大/墨西哥三国联办<br>
+    48 队 · 12 小组 · 64 场比赛
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>组别</th>
+          <th>球队</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set groups = {
+          "A": ["墨西哥", "南非", "韩国", "捷克"],
+          "B": ["加拿大", "波黑", "卡塔尔", "瑞士"],
+          "C": ["巴西", "摩洛哥", "海地", "苏格兰"],
+          "D": ["美国", "巴拉圭", "澳大利亚", "土耳其"],
+          "E": ["德国", "库拉索", "科特迪瓦", "厄瓜多尔"],
+          "F": ["荷兰", "日本", "瑞典", "突尼斯"],
+          "G": ["比利时", "埃及", "伊朗", "新西兰"],
+          "H": ["西班牙", "佛得角", "沙特", "乌拉圭"],
+          "I": ["法国", "塞内加尔", "伊拉克", "挪威"],
+          "J": ["阿根廷", "阿尔及利亚", "奥地利", "约旦"],
+          "K": ["葡萄牙", "刚果金", "乌兹别克斯坦", "哥伦比亚"],
+          "L": ["英格兰", "克罗地亚", "加纳", "巴拿马"]
+        } %}
+        {% for letter, teams in groups.items() %}
+        <tr>
+          <td><strong>{{ letter }}</strong></td>
+          <td>{{ teams | join(" · ") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

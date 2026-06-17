@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}预测 · 绿茵神算{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>比赛预测</h2>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="team_a">球队 A（主队）</label>
+      <select id="team_a">
+        <option value="">选择球队...</option>
+        {% for t in teams %}
+        <option value="{{ t.name }}">{{ t.name }}（{{ t.group }}组）</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="team_b">球队 B（客队）</label>
+      <select id="team_b">
+        <option value="">选择球队...</option>
+        {% for t in teams %}
+        <option value="{{ t.name }}">{{ t.name }}（{{ t.group }}组）</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="match_date">比赛日期</label>
+      <input type="date" id="match_date" value="2026-06-11">
+    </div>
+    <div class="form-group" style="display:flex;align-items:flex-end;">
+      <button class="btn btn-primary" id="btnPredict" onclick="doPredict()">预测</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultContainer" style="display:none;">
+  <div class="card result-card" id="resultCard"></div>
+</div>
+
+<div id="historyContainer">
+  <div class="card">
+    <h2>历史预测</h2>
+    <div id="historyList"><p class="empty-state">暂无预测记录</p></div>
+  </div>
+</div>
+
+<script>
+async function doPredict() {
+  const teamA = document.getElementById('team_a').value;
+  const teamB = document.getElementById('team_b').value;
+  const date = document.getElementById('match_date').value;
+
+  if (!teamA || !teamB) {
+    showToast('请选择两支球队', 'error');
+    return;
+  }
+  if (teamA === teamB) {
+    showToast('请选择两支不同的球队', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnPredict');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 预测中...';
+
+  try {
+    const res = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ team_a: teamA, team_b: teamB, match_date: date })
+    });
+    const data = await res.json();
+    renderResult(data);
+    loadHistory();
+  } catch (err) {
+    showToast('预测失败: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '预测';
+  }
+}
+
+function renderResult(d) {
+  const container = document.getElementById('resultContainer');
+  container.style.display = 'block';
+
+  const card = document.getElementById('resultCard');
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span class="team-name">${d.teamA.name}</span>
+      <span style="color:var(--gray-400);font-size:14px;">vs</span>
+      <span class="team-name">${d.teamB.name}</span>
+    </div>
+    <div class="score-big">${d.predictedScore}</div>
+
+    <div class="prob-bar">
+      <div class="seg seg-a" style="width:${d.teamA.winProb}%">${d.teamA.winProb}%</div>
+      <div class="seg seg-draw" style="width:${d.draw}%">${d.draw}%</div>
+      <div class="seg seg-b" style="width:${d.teamB.winProb}%">${d.teamB.winProb}%</div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:13px;color:var(--gray-600);">${d.teamA.name} 胜</span>
+      <span style="font-size:13px;color:var(--gray-600);">平</span>
+      <span style="font-size:13px;color:var(--gray-600);">${d.teamB.name} 胜</span>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">
+      <span class="confidence-badge confidence-${d.confidence}">${d.confidence} 置信度</span>
+    </div>
+
+    <div class="key-factors">
+      ${d.keyFactors.map(f => `<span class="tag">${f}</span>`).join('')}
+    </div>
+
+    <div class="analysis-text">${d.analysis}</div>
+
+    <div>
+      <span style="font-size:13px;color:var(--gray-400);font-weight:500;">关键球员</span>
+      <div class="player-watch">
+        ${d.playersToWatch.map(p => `
+          <div class="item">
+            <strong>${p.player}</strong>（${p.team}）<br>
+            <span style="color:var(--gray-600);">${p.reason}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function loadHistory() {
+  const container = document.getElementById('historyList');
+  try {
+    const res = await fetch('/api/predict/history');
+    const records = await res.json();
+    if (!records.length) {
+      container.innerHTML = '<p class="empty-state">暂无预测记录</p>';
+      return;
+    }
+    container.innerHTML = '<div class="table-wrap"><table><thead><tr><th>时间</th><th>主队</th><th>客队</th><th>预测比分</th><th>置信度</th></tr></thead><tbody>' +
+      records.slice(0, 20).map(r => `
+        <tr>
+          <td>${r.match_date || '-'}</td>
+          <td>${r.team_a}</td>
+          <td>${r.team_b}</td>
+          <td>${r.result.predictedScore}</td>
+          <td><span class="confidence-badge confidence-${r.result.confidence}">${r.result.confidence}</span></td>
+        </tr>
+      `).join('') +
+      '</tbody></table></div>';
+  } catch {
+    container.innerHTML = '<p class="empty-state">加载失败</p>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadHistory);
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}赛况 · 绿茵神算{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <h2 style="margin:0;">比赛信息</h2>
+    <button class="btn btn-primary" onclick="doCrawl()" id="btnCrawl">
+      刷新数据
+    </button>
+  </div>
+</div>
+
+<div id="matchList">
+  {% if matches %}
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>主队</th>
+            <th>客队</th>
+            <th>场地</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in matches %}
+            {% for match in m.matches %}
+            <tr>
+              <td>{{ m.date }}</td>
+              <td>{{ match.home }}</td>
+              <td>{{ match.away }}</td>
+              <td>{{ match.venue or '-' }}</td>
+              <td>
+                <span class="confidence-badge {{ 'confidence-高' if match.status == '已结束' else 'confidence-中' if match.status == '进行中' else 'confidence-低' }}">
+                  {{ match.status }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card">
+    <div class="empty-state">
+      <p>暂无比赛数据</p>
+      <p style="font-size:14px;margin-top:4px;">点击"刷新数据"获取最新信息</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>每日情报</h2>
+  <div id="dailyInfo">
+    <p class="empty-state">加载中...</p>
+  </div>
+</div>
+
+<script>
+async function doCrawl() {
+  const btn = document.getElementById('btnCrawl');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 刷新中...';
+
+  try {
+    const res = await fetch('/api/crawl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'auto' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('数据已刷新', 'success');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast('刷新失败: ' + (data.error || '未知错误'), 'error');
+    }
+  } catch (err) {
+    showToast('请求失败: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '刷新数据';
+  }
+}
+
+async function loadDailyInfo() {
+  const container = document.getElementById('dailyInfo');
+  try {
+    const res = await fetch('/api/matches');
+    const matches = await res.json();
+
+    // 也尝试从 data/daily_info.json 加载情报（通过后端返回）
+    const infoRes = await fetch('/api/crawl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'info_only' })
+    });
+
+    // 直接展示 daily_info 内容
+    const dailyRes = await fetch('/api/matches');
+    // fallback: 展示 matches 列表
+    if (matches.length) {
+      let html = '<ul style="padding-left:20px;">';
+      matches.forEach(m => {
+        m.matches.forEach(match => {
+          const line = match.status === '未开始'
+            ? `${match.home} vs ${match.away} — ${match.venue || '待定'}`
+            : `${match.home} vs ${match.away} — ${match.status}`;
+          html += `<li style="margin-bottom:6px;color:var(--gray-600);">${line}</li>`;
+        });
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+    } else {
+      container.innerHTML = '<p class="empty-state">暂无情报</p>';
+    }
+  } catch {
+    container.innerHTML = '<p class="empty-state">加载失败</p>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadDailyInfo);
+</script>
+{% endblock %}

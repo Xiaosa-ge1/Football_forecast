@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}绿茵神算 · 2026 世界杯预测{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-logo">
+      ⚽ 绿茵神算
+      <small>2026</small>
+    </a>
+    <a href="/predict" class="{% if request.url.path == '/predict' %}active{% endif %}">预测</a>
+    <a href="/matches" class="{% if request.url.path == '/matches' %}active{% endif %}">赛况</a>
+    <a href="/feedback" class="{% if request.url.path == '/feedback' %}active{% endif %}">反馈</a>
+  </nav>
+
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

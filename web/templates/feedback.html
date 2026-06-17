@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}反馈 · 绿茵神算{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="num">{{ stats.total }}</div>
+    <div class="label">总预测</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ stats.correct }}</div>
+    <div class="label">正确</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ stats.accuracy }}%</div>
+    <div class="label">准确率</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ '%.0f' | format(stats.brier_score) if stats.brier_score else '-' }}</div>
+    <div class="label">Brier 分数</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>录入比赛结果</h2>
+  <form id="feedbackForm" onsubmit="return submitFeedback(event)">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prediction_id">选择预测记录</label>
+        <select id="prediction_id" required>
+          <option value="">选择...</option>
+          {% for p in predictions %}
+            {% if not p.get('has_feedback') %}
+            <option value="{{ p.id }}">
+              {{ p.team_a }} vs {{ p.team_b }}（预测 {{ p.result.predictedScore }}）
+            </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="team_a_goals">{{ '主队' if predictions else '球队 A' }} 进球</label>
+        <input type="number" id="team_a_goals" min="0" max="20" value="0" required>
+      </div>
+      <div class="form-group">
+        <label for="team_b_goals">{{ '客队' if predictions else '球队 B' }} 进球</label>
+        <input type="number" id="team_b_goals" min="0" max="20" value="0" required>
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;">
+        <button class="btn btn-primary" type="submit">提交</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>按结果类型统计</h2>
+  {% if stats.by_outcome %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>结果类型</th>
+          <th>总场次</th>
+          <th>预测正确</th>
+          <th>准确率</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for outcome, data in stats.by_outcome.items() %}
+        <tr>
+          <td>{{ outcome }}</td>
+          <td>{{ data.total }}</td>
+          <td>{{ data.correct }}</td>
+          <td>{{ data.accuracy }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">暂无反馈数据，提交比赛结果后这里将显示统计</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>最近反馈</h2>
+  {% if stats.recent %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>对阵</th>
+          <th>预测比分</th>
+          <th>实际比分</th>
+          <th>预测结果</th>
+          <th>实际结果</th>
+          <th>正确</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in stats.recent %}
+        <tr>
+          <td>{{ r.team_a }} vs {{ r.team_b }}</td>
+          <td>{{ r.predicted_score }}</td>
+          <td>{{ r.actual_score }}</td>
+          <td>{{ r.predicted_outcome }}</td>
+          <td>{{ r.actual_outcome }}</td>
+          <td>{{ '✅' if r.is_correct else '❌' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">暂无反馈记录</p>
+  {% endif %}
+</div>
+
+<script>
+async function submitFeedback(e) {
+  e.preventDefault();
+  const id = document.getElementById('prediction_id').value;
+  const a = parseInt(document.getElementById('team_a_goals').value);
+  const b = parseInt(document.getElementById('team_b_goals').value);
+
+  if (!id) {
+    showToast('请选择一条预测记录', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prediction_id: id, team_a_goals: a, team_b_goals: b })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('反馈已保存', 'success');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast('提交失败: ' + (data.error || '未知错误'), 'error');
+    }
+  } catch (err) {
+    showToast('请求失败: ' + err.message, 'error');
+  }
+  return false;
+}
+</script>
+{% endblock %}
