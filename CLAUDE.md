@@ -81,6 +81,7 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 - 新增路由在 `app/routes/` 下创建，在 `app/main.py` 注册
 
 ## 关键链接
+helloworld
 修改
 - Live Demo: http://worldcup.youliaoyun.com
 - GitHub: https://github.com/Xiaosa-ge1/Football_forecast
