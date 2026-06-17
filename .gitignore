@@ -12,6 +12,7 @@ build/
 # Data - keep structure but not generated content
 data/predictions/*.json
 data/matches/*.json
+data/worldcup.db
 
 # Environment
 .env

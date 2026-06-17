@@ -3,6 +3,15 @@
 {% block title %}赛况 · 绿茵神算{% endblock %}
 
 {% block content %}
+
+<!-- 爬取状态指示栏 -->
+<div class="crawl-status" id="crawlStatus">
+  <span class="dot" id="statusDot"></span>
+  <span id="statusText">检查中...</span>
+  <span style="margin-left:auto;font-size:12px;color:var(--gray-400);" id="statusNext"></span>
+</div>
+
+<!-- 比赛列表 -->
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
     <h2 style="margin:0;">比赛信息</h2>
@@ -21,6 +30,7 @@
           <tr>
             <th>日期</th>
             <th>主队</th>
+            <th>比分</th>
             <th>客队</th>
             <th>场地</th>
             <th>状态</th>
@@ -31,8 +41,15 @@
             {% for match in m.matches %}
             <tr>
               <td>{{ m.date }}</td>
-              <td>{{ match.home }}</td>
-              <td>{{ match.away }}</td>
+              <td><strong>{{ match.home }}</strong></td>
+              <td>
+                {% if match.home_score is not none and match.away_score is not none %}
+                  <strong>{{ match.home_score }} - {{ match.away_score }}</strong>
+                {% else %}
+                  vs
+                {% endif %}
+              </td>
+              <td><strong>{{ match.away }}</strong></td>
               <td>{{ match.venue or '-' }}</td>
               <td>
                 <span class="confidence-badge {{ 'confidence-高' if match.status == '已结束' else 'confidence-中' if match.status == '进行中' else 'confidence-低' }}">
@@ -56,6 +73,15 @@
   {% endif %}
 </div>
 
+<!-- 小组积分榜 -->
+<div class="card" id="standingsCard">
+  <h2>小组积分榜</h2>
+  <div id="standingsContainer">
+    <p class="empty-state">加载中...</p>
+  </div>
+</div>
+
+<!-- 每日情报 -->
 <div class="card">
   <h2>每日情报</h2>
   <div id="dailyInfo">
@@ -64,6 +90,7 @@
 </div>
 
 <script>
+// ── 爬取触发（DOM 增量更新，不再整页刷新） ──
 async function doCrawl() {
   const btn = document.getElementById('btnCrawl');
   btn.disabled = true;
@@ -78,7 +105,12 @@ async function doCrawl() {
     const data = await res.json();
     if (data.success) {
       showToast('数据已刷新', 'success');
-      setTimeout(() => location.reload(), 800);
+      await Promise.all([
+        loadMatchList(),
+        loadDailyInfo(),
+        loadStandings(),
+        loadCrawlStatus()
+      ]);
     } else {
       showToast('刷新失败: ' + (data.error || '未知错误'), 'error');
     }
@@ -90,31 +122,58 @@ async function doCrawl() {
   }
 }
 
-async function loadDailyInfo() {
-  const container = document.getElementById('dailyInfo');
+// ── 加载比赛列表（从 SQLite JSON 缓存） ──
+async function loadMatchList() {
+  const container = document.getElementById('matchList');
   try {
     const res = await fetch('/api/matches');
     const matches = await res.json();
 
-    // 也尝试从 data/daily_info.json 加载情报（通过后端返回）
-    const infoRes = await fetch('/api/crawl', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: 'info_only' })
+    if (!matches.length) {
+      container.innerHTML = `<div class="card"><div class="empty-state">
+        <p>暂无比赛数据</p>
+        <p style="font-size:14px;margin-top:4px;">点击"刷新数据"获取最新信息</p>
+      </div></div>`;
+      return;
+    }
+
+    let html = '<div class="card"><div class="table-wrap"><table>';
+    html += '<thead><tr><th>日期</th><th>主队</th><th>比分</th><th>客队</th><th>场地</th><th>状态</th></tr></thead><tbody>';
+
+    matches.forEach(m => {
+      const statusClass = m.status === '已结束' ? 'confidence-高'
+        : m.status === '进行中' ? 'confidence-中' : 'confidence-低';
+      const score = (m.home_score != null && m.away_score != null)
+        ? `<strong>${m.home_score} - ${m.away_score}</strong>` : 'vs';
+
+      html += `<tr>
+        <td>${escapeHtml(m.date)}</td>
+        <td><strong>${escapeHtml(m.home)}</strong></td>
+        <td>${score}</td>
+        <td><strong>${escapeHtml(m.away)}</strong></td>
+        <td>${escapeHtml(m.venue || '-')}</td>
+        <td><span class="confidence-badge ${statusClass}">${escapeHtml(m.status)}</span></td>
+      </tr>`;
     });
 
-    // 直接展示 daily_info 内容
-    const dailyRes = await fetch('/api/matches');
-    // fallback: 展示 matches 列表
-    if (matches.length) {
+    html += '</tbody></table></div></div>';
+    container.innerHTML = html;
+  } catch {
+    container.innerHTML = '<div class="card"><div class="empty-state"><p>加载失败</p></div></div>';
+  }
+}
+
+// ── 加载每日情报 ──
+async function loadDailyInfo() {
+  const container = document.getElementById('dailyInfo');
+  try {
+    const res = await fetch('/api/daily-info');
+    const data = await res.json();
+
+    if (data.info && data.info.length) {
       let html = '<ul style="padding-left:20px;">';
-      matches.forEach(m => {
-        m.matches.forEach(match => {
-          const line = match.status === '未开始'
-            ? `${match.home} vs ${match.away} — ${match.venue || '待定'}`
-            : `${match.home} vs ${match.away} — ${match.status}`;
-          html += `<li style="margin-bottom:6px;color:var(--gray-600);">${line}</li>`;
-        });
+      data.info.forEach(line => {
+        html += `<li style="margin-bottom:6px;color:var(--gray-600);">${escapeHtml(line)}</li>`;
       });
       html += '</ul>';
       container.innerHTML = html;
@@ -126,6 +185,123 @@ async function loadDailyInfo() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadDailyInfo);
+// ── 加载小组积分榜 ──
+async function loadStandings() {
+  const container = document.getElementById('standingsContainer');
+  try {
+    const res = await fetch('/api/standings');
+    const standings = await res.json();
+
+    if (!standings.length) {
+      container.innerHTML = '<p class="empty-state">暂无积分榜数据</p>';
+      return;
+    }
+
+    const groups = {};
+    standings.forEach(s => {
+      const g = s.group_name || s.group || '?';
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(s);
+    });
+
+    let html = '<div class="standings-grid">';
+    Object.keys(groups).sort().forEach(g => {
+      html += `<div class="standings-group">
+        <h3>${escapeHtml(g)} 组</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>球队</th><th>赛</th><th>胜</th><th>平</th><th>负</th><th>进/失</th><th>净</th><th>分</th></tr></thead>
+            <tbody>`;
+
+      groups[g].sort((a, b) => (a.rank || 99) - (b.rank || 99)).forEach((s, i) => {
+        const rowClass = i < 2 ? 'class="qualified"' : '';
+        html += `<tr ${rowClass}>
+          <td>${s.rank || i + 1}</td>
+          <td><strong>${escapeHtml(s.team)}</strong></td>
+          <td>${s.played}</td>
+          <td>${s.won}</td>
+          <td>${s.drawn}</td>
+          <td>${s.lost}</td>
+          <td>${s.goals_for}/${s.goals_against}</td>
+          <td>${s.goal_diff > 0 ? '+' + s.goal_diff : s.goal_diff}</td>
+          <td><strong>${s.points}</strong></td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div></div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  } catch {
+    container.innerHTML = '<p class="empty-state">积分榜加载失败</p>';
+  }
+}
+
+// ── 加载爬取状态 ──
+async function loadCrawlStatus() {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  const next = document.getElementById('statusNext');
+
+  try {
+    const res = await fetch('/api/crawl/status');
+    const data = await res.json();
+    const last = data.last_crawl;
+
+    if (!last) {
+      dot.className = 'dot red';
+      text.textContent = '暂无爬取记录';
+      next.textContent = '';
+      return;
+    }
+
+    const fetchedAt = new Date(last.fetched_at + 'Z');
+    const now = new Date();
+    const diffMin = Math.floor((now - fetchedAt) / 60000);
+
+    const sourceText = last.source || '未知来源';
+    const matchInfo = last.matches_count ? ` (${last.matches_count} 场)` : '';
+
+    if (last.success) {
+      if (diffMin < 30) {
+        dot.className = 'dot green';
+      } else if (diffMin < 120) {
+        dot.className = 'dot yellow';
+      } else {
+        dot.className = 'dot red';
+      }
+      text.textContent = `上次更新: ${fmtTime(fetchedAt)} · ${sourceText}${matchInfo}`;
+    } else {
+      dot.className = 'dot red';
+      text.textContent = `爬取失败 · ${sourceText}`;
+    }
+
+    if (data.next_scheduled) {
+      next.textContent = `下次: ${fmtTime(new Date(data.next_scheduled))}`;
+    }
+  } catch {
+    dot.className = 'dot red';
+    text.textContent = '状态获取失败';
+    next.textContent = '';
+  }
+}
+
+function fmtTime(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+// ── 初始化 ──
+document.addEventListener('DOMContentLoaded', () => {
+  loadDailyInfo();
+  loadStandings();
+  loadCrawlStatus();
+});
 </script>
 {% endblock %}
